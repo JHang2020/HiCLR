@@ -1,0 +1,72 @@
+work_dir: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU120/xset/Transformer/motion_MutalDDM_with4parallel_ablmask02/finetune
+
+# weights: /data/gty/released_model/ntu60_xset_joint.pt
+weights: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU120/xset/Transformer/motion_MutalDDM_with4parallel_ablmask02/epoch300_model.pt
+ignore_weights: [encoder_q.fc, encoder_k, queue]
+# feeder
+train_feeder: feeder.ntu_feeder.Feeder_finetune
+train_feeder_args:
+  data_path: /mnt/netdisk/linlilang/CrosSCLR/data/NTU120_frame50/xset/train_position.npy
+  label_path: /mnt/netdisk/linlilang/CrosSCLR/data/NTU-RGB-D_120/xset/train_label.pkl
+  data_view: motion
+  use_aug: True
+  norm: False
+test_feeder: feeder.ntu_feeder.Feeder_finetune
+test_feeder_args:
+  data_path: /mnt/netdisk/linlilang/CrosSCLR/data/NTU120_frame50/xset/val_position.npy
+  label_path: /mnt/netdisk/linlilang/CrosSCLR/data/NTU-RGB-D_120/xset/val_label.pkl
+  data_view: motion
+  norm: False
+
+# model
+model: net.aimclr.AimCLR
+model_args:
+  base_encoder: net.dsta.DSTANet
+  pretrain: False
+  # feature_dim: 128
+  # queue_size: 32768
+  # momentum: 0.999
+  # Temperature: 0.07
+  # mlp: True
+  transformer: True
+  num_class: 120
+  num_point: 25
+  num_frame: 50
+  num_subset: 3
+  num_person: 2
+  glo_reg_s: True
+  att_s: True
+  glo_reg_t: False
+  att_t: False
+  dropout: 0
+  attentiondrop: 0.0
+  dropout2d: 0
+  use_spatial_att: True
+  use_temporal_att: False
+  use_pet: True
+  use_pes: True
+  fix_conv1: True
+  #in_channels, out_channels, inter_channels, stride
+  config: [ [32, 32, 16, 1], [32, 32, 16, 1],
+            [32, 64, 16, 2], [64, 64, 16, 1],
+            [64, 128, 32, 2], [128, 128, 32, 1],
+            [128, 128, 32, 1], [128, 256, 32, 1],
+  ]
+
+# optim
+nesterov: True
+weight_decay: 5e-4
+base_lr: 0.1
+optimizer: SGD
+warm_up_epoch: 5
+step: [45,65]
+
+# training
+device: [6]
+batch_size: 128
+test_batch_size: 128
+num_epoch: 80
+
+# log
+save_interval: -1
+eval_interval: 3
