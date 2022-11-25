@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+
+skeleton_visualize.py
+src.zip
+test_code.py
+exp_log
+ensemble_ntu_cs.py
+ensemble_ntu_cv.py
+net/aimclr_swap.py
+net/att_drop.py
+net/cpm.py
+net/crossclr_3views.py
+net/st_gcn_ntu.py
+net/st_gcn_swap.py
