@@ -15,6 +15,10 @@ work_dir/
 Readme.md
 config/ntu120
 config/pkummd
-config/ntu60/pretext_attempt
+config/gcn_ntu60/pretext_attempt
 config/transformer_ntu60/ntu120
 net/aimclr.py
+config/gcn_ntu60/
+config/ntu120/
+config/pkummd/
+config/transformer_ntu60/

@@ -1,26 +1,24 @@
-# command line: main.py linear_evaluation --config /mnt/netdisk/zhangjh/Code/AimCLR_loss/config/ntu60/linear_eval/linear_eval_aimclr_xsub_joint.yaml
-work_dir: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/bone/linear_tmp
-weights: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/bone/epoch300_model.pt
+work_dir: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/ABL/joint_MutalDDM_with4parallel_ablmask/finetune/
+weights: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/ABL/joint_MutalDDM_with4parallel_ablmask/epoch300_model.pt
 ignore_weights: [encoder_q.fc, encoder_k, queue]
-#start_epoch: 95
+#start_epoch: 60
+#start_iter: 38200
 # feeder
-train_feeder: feeder.ntu_feeder.Feeder_single
+train_feeder: feeder.ntu_feeder.Feeder_finetune
 train_feeder_args:
   data_path: /mnt/netdisk/linlilang/CrosSCLR/data/NTU60_frame50/xsub/train_position.npy
   label_path: /mnt/netdisk/linlilang/CrosSCLR/data/NTU-RGB-D/xsub/train_label.pkl
-  shear_amplitude: -1
-  temperal_padding_ratio: -1
-  mmap: True
-test_feeder: feeder.ntu_feeder.Feeder_single
+  data_view: joint
+  norm: False
+test_feeder: feeder.ntu_feeder.Feeder_finetune
 test_feeder_args:
   data_path: /mnt/netdisk/linlilang/CrosSCLR/data/NTU60_frame50/xsub/val_position.npy
   label_path: /mnt/netdisk/linlilang/CrosSCLR/data/NTU-RGB-D/xsub/val_label.pkl
-  shear_amplitude: -1
-  temperal_padding_ratio: -1
-  mmap: True
+  data_view: joint
+  norm: False
 
 # model
-model: net.hiclr.HiCLR
+model: net.aimclr.AimCLR
 model_args:
   base_encoder: net.st_gcn.Model
   pretrain: False
@@ -38,21 +36,19 @@ model_args:
     layout: 'ntu-rgb+d'
     strategy: 'spatial'
   edge_importance_weighting: True
-# optim
-nesterov: False
-weight_decay: 0.0
-base_lr: 3.
-optimizer: SGD
-step: [80]
 
+#optim
+weight_decay: 0.0001
+base_lr: 0.1
+warm_up_epoch: 5
+optimizer: SGD
+step: [30, 55]
 # training
 device: [0]
-batch_size: 128
-test_batch_size: 128
-num_epoch: 100
-stream: 'bone'
+batch_size: 64
+test_batch_size: 64
+num_epoch: 70
 
-# log
 save_interval: -1
 eval_interval: 5
 

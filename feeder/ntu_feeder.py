@@ -89,8 +89,6 @@ class Feeder_triple(torch.utils.data.Dataset):
         data2 = self._aug(data_numpy)
         data3 = self._strong_aug(data_numpy)
         data4 = self._strong_aug(data_numpy)
-        #data5 = self._strong_aug(data_numpy)
-        #data5 = data4
         return [data1, data2, data3, data4], label
 
     def _aug(self, data_numpy):

@@ -4,22 +4,6 @@ import numpy as np
 import random
 import math
 
-class SKAdaIN(nn.Module):
-    def __init__(self, in_channels=2048, out_channels=2048):
-        super(SKAdaIN, self).__init__()
-
-        self.affine_scale = nn.Linear(in_channels, out_channels, bias=True)
-        self.affine_bias = nn.Linear(in_channels, out_channels, bias=True)
-        self.norm = nn.InstanceNorm1d(in_channels, affine = False, momentum=0.9,  track_running_stats=False)
-
-    def forward(self, x, w):
-        y_scale = 1 + self.affine_scale(w)
-        y_bias = 0 + self.affine_bias(w)
-        x = self.norm(x)
-        x_scale = (x * y_scale) + y_bias
-
-        return x_scale
-
 def calc_mean_std(feat, eps=1e-5):
     # eps is a small value added to the variance to avoid divide-by-zero.
     size = feat.size()#N,C,T,V

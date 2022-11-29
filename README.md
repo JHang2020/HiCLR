@@ -12,25 +12,33 @@ This is an official PyTorch implementation of [**"Hierarchical Consistent Contra
 - Then downsample the data to 50 frames with `feeder/preprocess_ntu.py` and `feeder/preprocess_pku.py`.
 
 ## Train the Model
-See the run_cs.sh for the detail instructions.
+See the run_cs.sh for the detailed instructions.
 
 You can change the settings in the corresponding `.yaml` file. 
 
 ```bash
 # train on NTU RGB+D xsub joint stream
 $ python main.py pretrain_hiclr --config config/ntu60/pretext/pretext_hiclr_xsub_joint.yaml
+
+#linear evaluation on NTU RGB+D xsub joint stream
+$ python main.py linear_evaluation --config config/ntu60/linear_eval/linear_eval_aimclr_xsub_joint.yaml 
+
+#finetune on NTU RGB+D xsub joint stream
+$ python main.py finetune_evaluation --config  /mnt/netdisk/zhangjh/Code/HiCLR/config/gcn_ntu60/finetune/xsub_joint.yaml 
 ```
+Similarly, set the config as the `.yaml` file in `config/transformer_ntu60/` if you want to train a Transformaer-based model.
+
 ## Results and Pre-trained Models
 For three-streams results, we use the code in ensemble_xxx.py to obtain the fusion results.
-The performance of the released code is better than that reported in the paper.
-You can find the pre-trained model weights here.
+The performance of the released code is slightly better than that reported in the paper.
+You can find the pre-trained model weights here (for GCN).
 
 |     Model     | NTU 60 xsub (%) |
 | :-----------: | :-------------: |
 | HiCLR-joint  |      77.30      |
 | HiCLR-motion |      70.29      |
-|  HiCLR-bone  |            |
-|   3s-HiCLR   |    **80.**    |
+|  HiCLR-bone  |      75.59      |
+|   3s-HiCLR   |    **80.94**    |
 
 
 ## Acknowledgement

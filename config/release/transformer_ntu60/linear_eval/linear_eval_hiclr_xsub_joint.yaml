@@ -1,8 +1,6 @@
-# command line: main.py linear_evaluation --config /mnt/netdisk/zhangjh/Code/AimCLR_loss/config/ntu60/linear_eval/linear_eval_aimclr_xsub_joint.yaml
-work_dir: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/bone/linear_tmp
-weights: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/bone/epoch300_model.pt
+work_dir: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/joint
+weights: 
 ignore_weights: [encoder_q.fc, encoder_k, queue]
-#start_epoch: 95
 # feeder
 train_feeder: feeder.ntu_feeder.Feeder_single
 train_feeder_args:
@@ -22,38 +20,52 @@ test_feeder_args:
 # model
 model: net.hiclr.HiCLR
 model_args:
-  base_encoder: net.st_gcn.Model
+  base_encoder: net.dsta.DSTANet
   pretrain: False
   # feature_dim: 128
   # queue_size: 32768
   # momentum: 0.999
   # Temperature: 0.07
   # mlp: True
-  in_channels: 3
-  hidden_channels: 16
-  hidden_dim: 256
+  transformer: True
   num_class: 60
-  dropout: 0.5
-  graph_args:
-    layout: 'ntu-rgb+d'
-    strategy: 'spatial'
-  edge_importance_weighting: True
+  num_point: 25
+  num_frame: 50
+  num_subset: 3
+  num_person: 2
+  glo_reg_s: True
+  att_s: True
+  glo_reg_t: False
+  att_t: False
+  dropout: 0
+  attentiondrop: 0.0
+  dropout2d: 0
+  use_spatial_att: True
+  use_temporal_att: False
+  use_pet: True
+  use_pes: True
+  fix_conv1: True
+  #in_channels, out_channels, inter_channels, stride
+  config: [ [32, 32, 16, 1], [32, 32, 16, 1],
+            [32, 64, 16, 2], [64, 64, 16, 1],
+            [64, 128, 32, 2], [128, 128, 32, 1],
+            [128, 128, 32, 1], [128, 256, 32, 1],
+  ]
+
 # optim
 nesterov: False
 weight_decay: 0.0
-base_lr: 3.
+base_lr: 3
 optimizer: SGD
-step: [80]
+step: [30,80]
 
 # training
 device: [0]
 batch_size: 128
 test_batch_size: 128
 num_epoch: 100
-stream: 'bone'
+stream: 'joint'
 
 # log
 save_interval: -1
 eval_interval: 5
-
-

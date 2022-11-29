@@ -6,7 +6,7 @@ from tqdm import tqdm
 print('-' * 20 + 'Linear Eval' + '-' * 20)
 
 joint_path = '/mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/joint/linear_tmp/'
-bone_path = '/mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/bone_MutalDDM_with4parallel_ablmask/'
+bone_path = '/mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/bone/linear_tmp/'
 motion_path = '/mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/motion/linear_tmp/'
 
 #label = open('/mnt/netdisk/linlilang/CrosSCLR/data/NTU-RGB-D_120/xsub/val_label.pkl', 'rb')
