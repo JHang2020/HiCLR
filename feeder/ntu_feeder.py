@@ -85,13 +85,13 @@ class Feeder_triple(torch.utils.data.Dataset):
         label = self.label[index]
 
         # processing
-        data1 = self._strong_aug(data_numpy)
+        data1 = self._aug(data_numpy)
         data2 = self._aug(data_numpy)
-        data3 = self._aug(data_numpy)
+        data3 = self._strong_aug(data_numpy)
         data4 = self._strong_aug(data_numpy)
-        data5 = self._strong_aug(data_numpy)
+        #data5 = self._strong_aug(data_numpy)
         #data5 = data4
-        return [data1, data2, data3, data4, data5], label
+        return [data1, data2, data3, data4], label
 
     def _aug(self, data_numpy):
         if self.temperal_padding_ratio > 0:

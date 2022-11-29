@@ -1,8 +1,6 @@
 # command line: main.py linear_evaluation --config /mnt/netdisk/zhangjh/Code/AimCLR_loss/config/ntu60/linear_eval/linear_eval_aimclr_xsub_joint.yaml
-work_dir: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/joint_mask_diffT/linear_tmp
-
-# weights: /data/gty/released_model/ntu60_xsub_joint.pt
-weights: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/joint_mask_diffT/epoch300_model.pt
+work_dir: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/joint/linear_tmp
+weights: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/joint/epoch290_model.pt
 ignore_weights: [encoder_q.fc, encoder_k, queue]
 #start_epoch: 95
 # feeder
@@ -22,7 +20,7 @@ test_feeder_args:
   mmap: True
 
 # model
-model: net.aimclr.AimCLR
+model: net.hiclr.HiCLR
 model_args:
   base_encoder: net.st_gcn.Model
   pretrain: False

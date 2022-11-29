@@ -33,7 +33,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Processor collection')
     processors = dict()
 
-    processors['pretrain_aimclr'] = import_class('processor.pretrain_aimclr.AimCLR_Processor')
+    processors['pretrain_hiclr'] = import_class('processor.pretrain_hiclr.HiCLR_Processor')
     processors['linear_evaluation'] = import_class('processor.linear_evaluation.LE_Processor')
     processors['finetune_evaluation'] = import_class('processor.finetune_evaluation.FT_Processor')
     #processors['vis_evaluation'] = import_class('processor.visualize_aimclr.Visualize_Processor')

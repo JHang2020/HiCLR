@@ -97,60 +97,56 @@ class HiCLR(nn.Module):
         assert self.K % batch_size == 0  # for simplicity
         self.queue_ptr[0] = (self.queue_ptr[0] + batch_size) % self.K
 
-    def forward(self, im_q_extreme, im_q, im_k=None, nnm=False, topk=1,KNN=False,return_feat=False):
+    def forward(self, im_q_1, im_q, im_k=None, nnm=False, topk=1,KNN=False,return_feat=False):
         """
         random dropout and add edges for adj graph
         Input:
             im_q: a batch of query sequences
             im_k: a batch of key sequences
-            im_q_extreme: a batch of extremely augmented query sequences
+            im_q_1: a batch of extremely augmented query sequences
         """
-        if nnm:
-            return self.nearest_neighbors_mining(im_q, im_k, im_q_extreme, topk)
-
-        if not self.pretrain:
-            return self.encoder_q(im_q,KNN=KNN,return_feat=return_feat)
+        return self.encoder_q(im_q,KNN=KNN,return_feat=return_feat)
     
-    def forward_mutalddm_with4p_ablmask(self, im_q_extreme1,im_q_extreme2, im_q, im_k=None, im_k_str=None, nnm=False, topk=1,mask=None):
+    def forward_pretrain_wmask(self, im_q_1,im_q_2, im_q, im_k=None, im_k_str=None, nnm=False, topk=1,mask=None):
         """
         Only mask augmentation is applied in the third branch 
         Input:
             im_q: a batch of query sequences
+            im_q_1: a batch of query sequences corresponding to the normal augmented branch
+            im_q_2: a batch of query sequences corresponding to the mask augmented branch
             im_k: a batch of key sequences
-            im_q_extreme: a batch of extremely augmented query sequences
         """
         if mask != None:
-            im_q_extreme2 = im_q_extreme2.permute(0,2,4,3,1)#NTMVC 
-            im_q_extreme2 = im_q_extreme2*mask
-            im_q_extreme2[mask==0] = self.mask_param
-            im_q_extreme2 = im_q_extreme2.permute(0,4,1,3,2)#NCTVM
+            im_q_2 = im_q_2.permute(0,2,4,3,1)#NTMVC 
+            im_q_2 = im_q_2*mask
+            im_q_2[mask==0] = self.mask_param
+            im_q_2 = im_q_2.permute(0,4,1,3,2)#NCTVM
         if nnm:
-            return self.nearest_neighbors_mining_mutalddm_with4p_ablmask(im_q, im_k, im_q_extreme1,im_q_extreme2, topk, im_k_str=im_k_str)
+            return self.nearest_neighbors_mining_mutalddm_wmask(im_q, im_k, im_q_1,im_q_2, topk, im_k_str=im_k_str)
 
         if not self.pretrain:
             return self.encoder_q(im_q)
 
-        # Obtain the normally augmented query feature
+        # Obtain the basic augmented feature
         q = self.encoder_q(im_q)  # NxC
-        # Obtain the extremely augmented query feature and dropped extremely augmented query feature
+
+        #Obtain the features in other branches
+        #drop_graph=False -> No drop edges applied
         if mask!=None:
-            q_extreme = self.encoder_q(im_q_extreme1, drop_graph=False)  # NxC
-            q_extreme_drop = self.encoder_q(im_q_extreme2, drop_graph=False)  # NxC
+            q_1 = self.encoder_q(im_q_1, drop_graph=False)  # NxC
+            q_2 = self.encoder_q(im_q_2, drop_graph=False)  # NxC
 
         # Normalize the feature
         q = F.normalize(q, dim=1)
-        q_extreme = F.normalize(q_extreme, dim=1)
-        q_extreme_drop = F.normalize(q_extreme_drop, dim=1)
+        q_1 = F.normalize(q_1, dim=1)
+        q_2 = F.normalize(q_2, dim=1)
 
         # Compute key features
         with torch.no_grad():  # no gradient to keys
             self._momentum_update_key_encoder()  # update the key encoder
 
             k = self.encoder_k(im_k)  # keys: NxC
-            k = F.normalize(k, dim=1)
-            if im_k_str!=None:
-                k_str = self.encoder_k(im_k_str)  # keys: NxC
-                k_str = F.normalize(k_str, dim=1)                
+            k = F.normalize(k, dim=1)        
 
         # Compute logits of normally augmented query using Einstein sum
         # positive logits: Nx1
@@ -164,58 +160,56 @@ class HiCLR(nn.Module):
         # labels: positive key indicators
         labels = torch.zeros(logits.shape[0], dtype=torch.long).cuda()
 
-        # Compute logits_e of extremely augmented query using Einstein sum
+        # Compute logits_1 corresponding to the normal augmentation
         # positive logits: Nx1
-        l_pos_e = torch.einsum('nc,nc->n', [q_extreme, k]).unsqueeze(-1)
+        l_pos_e = torch.einsum('nc,nc->n', [q_1, k]).unsqueeze(-1)
         # negative logits: NxK
-        l_neg_e = torch.einsum('nc,ck->nk', [q_extreme, self.queue.clone().detach()])
+        l_neg_e = torch.einsum('nc,ck->nk', [q_1, self.queue.clone().detach()])
         # logits: Nx(1+K)
-        logits_e = torch.cat([l_pos_e, l_neg_e], dim=1)
+        logits_1 = torch.cat([l_pos_e, l_neg_e], dim=1)
         # apply temperature
-        logits_e /= self.T
-        logits_e_ddm = logits_e
-        logits_e = torch.softmax(logits_e, dim=1)
+        logits_1 /= self.T
+        logits_1_ddm = logits_1.clone()
+        logits_1 = torch.softmax(logits_1, dim=1)
 
-        # Compute logits_ed of dropped extremely augmented query using Einstein sum
+        # Compute logits_2 corresponding to the mask augmentation
         # positive logits: Nx1
-        l_pos_ed = torch.einsum('nc,nc->n', [q_extreme_drop, k]).unsqueeze(-1)
+        l_pos_ed = torch.einsum('nc,nc->n', [q_2, k]).unsqueeze(-1)
         # negative logits: NxK
-        l_neg_ed = torch.einsum('nc,ck->nk', [q_extreme_drop, self.queue.clone().detach()])
+        l_neg_ed = torch.einsum('nc,ck->nk', [q_2, self.queue.clone().detach()])
         # logits: Nx(1+K)
-        logits_ed = torch.cat([l_pos_ed, l_neg_ed], dim=1)
+        logits_2 = torch.cat([l_pos_ed, l_neg_ed], dim=1)
         # apply temperature
-        logits_ed /= self.T
-        logits_ed = torch.softmax(logits_ed, dim=1)
+        logits_2 /= self.T
+        logits_2 = torch.softmax(logits_2, dim=1)
 
         # Use the distribution of normally augmented view as supervision label
         labels_ddm = logits.clone().detach()
         labels_ddm = torch.softmax(labels_ddm, dim=1)
         labels_ddm = labels_ddm.detach()
         
-        labels_ddm2 = logits_e_ddm.clone().detach()
+        labels_ddm2 = logits_1_ddm.clone().detach()
         labels_ddm2 = torch.softmax(labels_ddm2, dim=1)
         labels_ddm2 = labels_ddm2.detach()
 
         # dequeue and enqueue
-        if im_k_str!=None:
-            self._dequeue_and_enqueue_wstrong(k,k_str)
-        else:
-            self._dequeue_and_enqueue(k)
+        self._dequeue_and_enqueue(k)
 
-        return logits, labels, logits_e, logits_ed, labels_ddm, labels_ddm2
+        return logits, labels, logits_1, logits_2, labels_ddm, labels_ddm2
     
-    def nearest_neighbors_mining_mutalddm_with4p_ablmask(self, im_q, im_k, im_q_extreme1,im_q_extreme2, topk=1,mask=None, im_k_str=None):
+    def nearest_neighbors_mining_mutalddm_wmask(self, im_q, im_k, im_q_1,im_q_2, topk=1,mask=None, im_k_str=None):
+        '''
+        The Nearest Neighbors Mining in AimCLR
+        '''
 
-        # Obtain the normally augmented query feature
-        q = self.encoder_q(im_q)  # NxC
-        # Obtain the extremely augmented query feature and dropped extremely augmented query feature
-        q_extreme = self.encoder_q(im_q_extreme1, drop_graph=False)  # NxC
-        q_extreme_drop = self.encoder_q(im_q_extreme2, drop_graph=True,return1d=True)  # NxC
+        q = self.encoder_q(im_q)  # NxC        
+        q_1 = self.encoder_q(im_q_1, drop_graph=False)  # NxC
+        q_2 = self.encoder_q(im_q_2, drop_graph=False)  # NxC
 
         # Normalize the feature
         q = F.normalize(q, dim=1)
-        q_extreme = F.normalize(q_extreme, dim=1)
-        q_extreme_drop = F.normalize(q_extreme_drop, dim=1)
+        q_1 = F.normalize(q_1, dim=1)
+        q_2 = F.normalize(q_2, dim=1)
 
         # Compute key features
         with torch.no_grad():  # no gradient to keys
@@ -223,38 +217,35 @@ class HiCLR(nn.Module):
 
             k = self.encoder_k(im_k)  # keys: NxC
             k = F.normalize(k, dim=1)
-            if im_k_str!=None:
-                k_str = self.encoder_k(im_k_str)  # keys: NxC
-                k_str = F.normalize(k_str, dim=1)  
 
         l_pos = torch.einsum('nc,nc->n', [q, k]).unsqueeze(-1)
         l_neg = torch.einsum('nc,ck->nk', [q, self.queue.clone().detach()])
 
-        l_pos_e = torch.einsum('nc,nc->n', [q_extreme, k]).unsqueeze(-1)
-        l_neg_e = torch.einsum('nc,ck->nk', [q_extreme, self.queue.clone().detach()])
+        l_pos_e = torch.einsum('nc,nc->n', [q_1, k]).unsqueeze(-1)
+        l_neg_e = torch.einsum('nc,ck->nk', [q_1, self.queue.clone().detach()])
 
-        l_pos_ed = torch.einsum('nc,nc->n', [q_extreme_drop, k]).unsqueeze(-1)
-        l_neg_ed = torch.einsum('nc,ck->nk', [q_extreme_drop, self.queue.clone().detach()])
+        l_pos_ed = torch.einsum('nc,nc->n', [q_2, k]).unsqueeze(-1)
+        l_neg_ed = torch.einsum('nc,ck->nk', [q_2, self.queue.clone().detach()])
 
         logits = torch.cat([l_pos, l_neg], dim=1)
-        logits_e = torch.cat([l_pos_e, l_neg_e], dim=1)
-        logits_ed = torch.cat([l_pos_ed, l_neg_ed], dim=1)
+        logits_1 = torch.cat([l_pos_e, l_neg_e], dim=1)
+        logits_2 = torch.cat([l_pos_ed, l_neg_ed], dim=1)
 
         logits /= self.T
-        logits_e /= self.T
-        logits_e_ddm = logits_e
+        logits_1 /= self.T
+        logits_1_ddm = logits_1.clone()
 
-        logits_ed /= self.T
+        logits_2 /= self.T
 
-        logits_e = torch.softmax(logits_e, dim=1)
-        logits_ed = torch.softmax(logits_ed, dim=1)
+        logits_1 = torch.softmax(logits_1, dim=1)
+        logits_2 = torch.softmax(logits_2, dim=1)
 
         # Use the distribution of normally augmented view as supervision label
         labels_ddm = logits.clone().detach()
         labels_ddm = torch.softmax(labels_ddm, dim=1)
         labels_ddm = labels_ddm.detach()
 
-        labels_ddm2 = logits_e_ddm.clone().detach()
+        labels_ddm2 = logits_1_ddm.clone().detach()
         labels_ddm2 = torch.softmax(labels_ddm2, dim=1)
         labels_ddm2 = labels_ddm2.detach()
 
@@ -271,9 +262,6 @@ class HiCLR(nn.Module):
 
         pos_mask = torch.cat([torch.ones(topk_onehot.size(0), 1).cuda(), topk_onehot], dim=1)
 
-        if im_k_str!=None:
-            self._dequeue_and_enqueue_wstrong(k,k_str)
-        else:
-            self._dequeue_and_enqueue(k)
+        self._dequeue_and_enqueue(k)
 
-        return logits, pos_mask, logits_e, logits_ed, labels_ddm, labels_ddm2
+        return logits, pos_mask, logits_1, logits_2, labels_ddm, labels_ddm2

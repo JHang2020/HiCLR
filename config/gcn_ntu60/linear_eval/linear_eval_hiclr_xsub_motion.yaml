@@ -1,7 +1,7 @@
-work_dir: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/motion_MutalDDM_with4parallel_ablmask_k100/linear_tmp
+work_dir: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/motion/linear_tmp
 
 # weights: /data/gty/released_model/ntu60_xsub_joint.pt
-weights: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/motion_MutalDDM_with4parallel_ablmask_k100/epoch300_model.pt
+weights: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/motion/epoch290_model.pt
 ignore_weights: [encoder_q.fc, encoder_k, queue]
 
 # feeder
@@ -21,7 +21,7 @@ test_feeder_args:
   mmap: True
 
 # model
-model: net.aimclr.AimCLR
+model: net.hiclr.HiCLR
 model_args:
   base_encoder: net.st_gcn.Model
   pretrain: False
@@ -48,7 +48,7 @@ optimizer: SGD
 step: [80]
 
 # training
-device: [0]
+device: [1]
 batch_size: 128
 test_batch_size: 128
 num_epoch: 100

@@ -5,11 +5,12 @@ from tqdm import tqdm
 # Linear
 print('-' * 20 + 'Linear Eval' + '-' * 20)
 
-joint_path = '/mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/PKU2/xsub/joint_MutalDDM_with4parallel_ablmask_1500/linear_tmp/'
-bone_path = '/mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/PKU2/xsub/bone_MutalDDM_with4parallel_ablmask_1500/linear_tmp/'
-motion_path = '/mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/PKU2/xsub/motion_MutalDDM_with4parallel_ablmask_1500/linear_tmp/'
+joint_path = '/mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/joint/linear_tmp/'
+bone_path = '/mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/bone_MutalDDM_with4parallel_ablmask/'
+motion_path = '/mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/motion/linear_tmp/'
 
-label = open('/mnt/netdisk/linlilang/PKUMMD2/xsub/val_label.pkl', 'rb')
+#label = open('/mnt/netdisk/linlilang/CrosSCLR/data/NTU-RGB-D_120/xsub/val_label.pkl', 'rb')
+label = open('/mnt/netdisk/linlilang/CrosSCLR/data/NTU-RGB-D/xsub/val_label.pkl', 'rb')
 label = np.array(pickle.load(label))
 r1 = open(joint_path + 'test_result.pkl', 'rb')
 r1 = list(pickle.load(r1).items())
