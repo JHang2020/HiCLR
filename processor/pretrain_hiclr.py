@@ -96,32 +96,29 @@ class HiCLR_Processor(PT_Processor):
                 raise ValueError
 
             # forward
-            #NOTE: data2 data3 is normal aug, data1 is the strong aug of the data2 !
-            if epoch <= self.arg.mining_epoch or 'skeletonclr' in self.arg.exp_descri:
-                if self.arg.exp_descri == 'MutalDDM_with4parallel_ablmask':
-                    m = self.mask_gen(data1,data1.shape[2]).to(data1)#N,C,T,V,M
-                    output1, target1, output2, output3, target2, target3 = self.model.forward_pretrain_wmask(im_q_1=data3, im_q_2=data4,im_q=data1, im_k=data2, mask=m)
-                    if hasattr(self.model, 'module'):
-                        self.model.module.update_ptr(output1.size(0))
-                    else:
-                        self.model.update_ptr(output1.size(0))
-                    loss1 = self.loss(output1, target1)
-                    loss2 = -torch.mean(torch.sum(torch.log(output2) * target2, dim=1))  # DDM loss
-                    loss3 = -torch.mean(torch.sum(torch.log(output3) * target3, dim=1))  # DDM loss
-                    loss = loss1 + (loss2 + loss3) / 2.
+            if epoch <= self.arg.mining_epoch:
+                m = self.mask_gen(data1,data1.shape[2]).to(data1)#N,C,T,V,M
+                output1, target1, output2, output3, target2, target3 = self.model.forward_pretrain_wmask(im_q_1=data3, im_q_2=data4,im_q=data1, im_k=data2, mask=m)
+                if hasattr(self.model, 'module'):
+                    self.model.module.update_ptr(output1.size(0))
+                else:
+                    self.model.update_ptr(output1.size(0))
+                loss1 = self.loss(output1, target1)
+                loss2 = -torch.mean(torch.sum(torch.log(output2) * target2, dim=1))  # DDM loss
+                loss3 = -torch.mean(torch.sum(torch.log(output3) * target3, dim=1))  # DDM loss
+                loss = loss1 + (loss2 + loss3) / 2.
             else:
-                if self.arg.exp_descri == 'MutalDDM_with4parallel_ablmask':
-                    m = self.mask_gen(data1,data1.shape[2]).to(data1)#N,C,T,V,M
-                    output1, mask, output2, output3, target2, target3 = self.model.forward_pretrain_wmask(im_q_1=data3, im_q_2=data4,im_q=data1, im_k=data2, nnm=True, topk=self.arg.topk,mask=m)
-                    if hasattr(self.model, 'module'):
-                        self.model.module.update_ptr(output1.size(0))
-                    else:
-                        self.model.update_ptr(output1.size(0))
-                    loss1 = - (F.log_softmax(output1, dim=1) * mask).sum(1) / mask.sum(1)
-                    loss1 = loss1.mean()
-                    loss2 = -torch.mean(torch.sum(torch.log(output2) * target2, dim=1))  # DDM loss
-                    loss3 = -torch.mean(torch.sum(torch.log(output3) * target3, dim=1))  # DDM loss
-                    loss = loss1 + (loss2 + loss3) / 2.
+                m = self.mask_gen(data1,data1.shape[2]).to(data1)#N,C,T,V,M
+                output1, mask, output2, output3, target2, target3 = self.model.forward_pretrain_wmask(im_q_1=data3, im_q_2=data4,im_q=data1, im_k=data2, nnm=True, topk=self.arg.topk,mask=m)
+                if hasattr(self.model, 'module'):
+                    self.model.module.update_ptr(output1.size(0))
+                else:
+                    self.model.update_ptr(output1.size(0))
+                loss1 = - (F.log_softmax(output1, dim=1) * mask).sum(1) / mask.sum(1)
+                loss1 = loss1.mean()
+                loss2 = -torch.mean(torch.sum(torch.log(output2) * target2, dim=1))  # DDM loss
+                loss3 = -torch.mean(torch.sum(torch.log(output3) * target3, dim=1))  # DDM loss
+                loss = loss1 + (loss2 + loss3) / 2.
 
             # backward
             self.optimizer.zero_grad()
@@ -148,58 +145,6 @@ class HiCLR_Processor(PT_Processor):
 
         self.show_epoch_info()
 
-    @torch.no_grad()
-    def knn_monitor(self, epoch):
-        if len(self.gpus) > 1:
-            self.model.module.encoder_q.eval()
-        else:
-            self.model.encoder_q.eval()
-        feature_bank, label_bank = [], []
-        with torch.no_grad():
-            # generate feature bank
-            for data, label in tqdm(self.data_loader['mem_train'], desc='Feature extracting'):
-                data = data.float().to(self.dev, non_blocking=True)
-                label = label.long().to(self.dev, non_blocking=True)
-
-                #data = self.view_gen(data)
-                if len(self.gpus) > 1:
-                    feature = self.model.module.encoder_q(data)
-                else:
-                    feature = self.model.encoder_q(data)
-                feature = F.normalize(feature, dim=1)
-                feature_bank.append(feature)
-                label_bank.append(label)
-            # [D, N]
-            feature_bank = torch.cat(feature_bank, dim=0).t().contiguous()
-            # [N]
-            feature_labels = torch.cat(label_bank).to(feature_bank.device)
-            # loop test data to predict the label by weighted knn search
-            for i in self.arg.knn_k:
-                total_top1, total_top5, total_num = 0, 0, 0
-                test_bar = tqdm(self.data_loader['mem_test'], desc='kNN-{}'.format(i))
-                for data, label in test_bar:
-                    data = data.float().to(self.dev, non_blocking=True)
-                    label = label.float().to(self.dev, non_blocking=True)
-
-                    #data = self.view_gen(data)
-
-                    if len(self.gpus) > 1:
-                        feature = self.model.module.encoder_q(data)
-                    else:
-                        feature = self.model.encoder_q(data)
-                    feature = F.normalize(feature, dim=1)
-
-                    pred_labels = knn_predict(feature, feature_bank, feature_labels, self.arg.knn_classes, i,
-                                              self.arg.knn_t)
-
-                    total_num += data.size(0)
-                    total_top1 += (pred_labels[:, 0] == label).float().sum().item()
-                    test_bar.set_postfix({'k': i, 'Accuracy': total_top1 / total_num * 100})
-                acc = total_top1 / total_num * 100
-
-                self.knn_results[i][epoch] = acc
-
-                self.train_writer.add_scalar('KNN-{}'.format(i), acc, epoch)
     @staticmethod
     def get_parser(add_help=False):
         # parameter priority: command line > config > default
@@ -221,7 +166,4 @@ class HiCLR_Processor(PT_Processor):
         parser.add_argument('--warmup_epochs', type=int, default=0, help='topk samples in nearest neighbor mining')
         parser.add_argument('--mask_args', action=DictAction, default=dict(), help='the arguments of model')
         parser.add_argument('--exp_descri', type=str, default='StandardDDM', help='Describe the method')
-        parser.add_argument('--randenque', type=str2bool, default=False, help='random enqueue or not')
-        parser.add_argument('--weight1', type=float, default=0.5, help='weight for branch1')
-        parser.add_argument('--weight2', type=float, default=0.5, help='weight for branch2')
         return parser

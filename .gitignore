@@ -23,3 +23,4 @@ config/ntu120/
 config/pkummd/
 config/transformer_ntu60/
 run_pkup1.sh
+processor/knn_eval.py
