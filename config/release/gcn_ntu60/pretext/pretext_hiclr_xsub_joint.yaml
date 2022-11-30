@@ -1,5 +1,3 @@
-# command line: main.py pretrain_aimclr --config config/ntu60/pretext/pretext_aimclr_xsub_joint.yaml
-
 base_lr: 0.1
 batch_size: 128
 debug: false

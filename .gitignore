@@ -22,3 +22,4 @@ config/gcn_ntu60/
 config/ntu120/
 config/pkummd/
 config/transformer_ntu60/
+run_pkup1.sh

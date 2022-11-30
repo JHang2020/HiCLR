@@ -1,5 +1,5 @@
-work_dir: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/ABL/joint_MutalDDM_with4parallel_ablmask/finetune/
-weights: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/ABL/joint_MutalDDM_with4parallel_ablmask/epoch300_model.pt
+work_dir: work_dir/NTU60/xsub/ABL/joint/finetune/
+weights: work_dir/NTU60/xsub/ABL/joint/epoch300_model.pt
 ignore_weights: [encoder_q.fc, encoder_k, queue]
 #start_epoch: 60
 #start_iter: 38200
@@ -18,7 +18,7 @@ test_feeder_args:
   norm: False
 
 # model
-model: net.aimclr.AimCLR
+model: net.hiclr.HiCLR
 model_args:
   base_encoder: net.st_gcn.Model
   pretrain: False

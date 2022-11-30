@@ -1,4 +1,4 @@
-work_dir: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/Transformer/joint
+work_dir: work_dir/NTU60/xsub/Transformer/joint/finetune
 # weights: /data/gty/released_model/ntu60_xset_bone.pt
 weights: 
 ignore_weights: [encoder_q.fc, encoder_k, queue]

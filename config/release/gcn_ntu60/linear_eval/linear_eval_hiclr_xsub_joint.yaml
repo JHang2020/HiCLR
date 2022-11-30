@@ -1,6 +1,5 @@
-# command line: main.py linear_evaluation --config /mnt/netdisk/zhangjh/Code/AimCLR_loss/config/ntu60/linear_eval/linear_eval_aimclr_xsub_joint.yaml
-work_dir: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/joint/linear_tmp
-weights: /mnt/netdisk/zhangjh/Code/HiCLR/work_dir/NTU60/xsub/joint/epoch290_model.pt
+work_dir: work_dir/NTU60/xsub/joint/linear_tmp
+weights: work_dir/NTU60/xsub/joint/epoch290_model.pt
 ignore_weights: [encoder_q.fc, encoder_k, queue]
 #start_epoch: 95
 # feeder

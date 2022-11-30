@@ -1,4 +1,4 @@
-work_dir: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/joint
+work_dir: work_dir/NTU60/xsub/Transformer/joint/linear_tmp
 weights: 
 ignore_weights: [encoder_q.fc, encoder_k, queue]
 # feeder

@@ -2,6 +2,8 @@
 
 This is an official PyTorch implementation of [**"Hierarchical Consistent Contrastive Learning for Skeleton-Based Action Recognition with Growing Augmentations"**](https://arxiv.org/abs/2211.13466) in *AAAI 2023*. 
 
+![](./fig/pipe.jpg)
+
 ## Requirements
   ![Python >=3.6](https://img.shields.io/badge/Python->=3.6-yellow.svg)    ![PyTorch >=1.6](https://img.shields.io/badge/PyTorch->=1.4-blue.svg)
 
@@ -18,19 +20,18 @@ You can change the settings in the corresponding `.yaml` file.
 
 ```bash
 # train on NTU RGB+D xsub joint stream
-$ python main.py pretrain_hiclr --config config/ntu60/pretext/pretext_hiclr_xsub_joint.yaml
-
+$ python main.py pretrain_hiclr --config config/release/gcn_ntu60/pretext/pretext_hiclr_xsub_joint.yaml
 #linear evaluation on NTU RGB+D xsub joint stream
-$ python main.py linear_evaluation --config config/ntu60/linear_eval/linear_eval_aimclr_xsub_joint.yaml 
+$ python main.py linear_evaluation --config config/release/gcn_ntu60/linear_eval/linear_eval_hiclr_xsub_joint.yaml
 
 #finetune on NTU RGB+D xsub joint stream
-$ python main.py finetune_evaluation --config  /mnt/netdisk/zhangjh/Code/HiCLR/config/gcn_ntu60/finetune/xsub_joint.yaml 
+$ python main.py finetune_evaluation --config config/release/gcn_ntu60/finetune/xsub_joint.yaml
 ```
 Similarly, set the config as the `.yaml` file in `config/transformer_ntu60/` if you want to train a Transformaer-based model.
 
 ## Results and Pre-trained Models
 For three-streams results, we use the code in ensemble_xxx.py to obtain the fusion results.
-The performance of the released code is slightly better than that reported in the paper.
+The performance of the released repo is slightly better than that reported in the paper.
 You can find the pre-trained model weights here (for GCN).
 
 |     Model     | NTU 60 xsub (%) |

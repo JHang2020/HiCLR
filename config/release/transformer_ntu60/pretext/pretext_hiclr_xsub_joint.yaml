@@ -1,4 +1,4 @@
-work_dir: /mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/NTU60/xsub/Transformer/joint
+work_dir: work_dir/NTU60/xsub/Transformer/joint
 
 exp_descri: MutalDDM_with4parallel_ablmask
 # feeder
@@ -67,7 +67,7 @@ num_epoch: 300
 stream: 'joint'
 
 mask_args:
-  mask_ratio: 0.2
+  mask_ratio: 0.1
   person_num: 2
   joint_num: 25
   channel_num: 3
