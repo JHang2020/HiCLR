@@ -32,7 +32,7 @@ Similarly, set the config as the `.yaml` file in `config/transformer_ntu60/` if 
 ## Results and Pre-trained Models
 For three-streams results, we use the code in ensemble_xxx.py to obtain the fusion results.
 The performance of the released repo is slightly better than that reported in the paper.
-You can find the pre-trained model weights here (for GCN).
+You can find the pre-trained model weights [here](https://drive.google.com/drive/folders/1xi4EgygteeLY1-9JIWIPcm-pYpoY7JTa?usp=share_link) (for GCN).
 
 |     Model     | NTU 60 xsub (%) |
 | :-----------: | :-------------: |
