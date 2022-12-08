@@ -8,7 +8,7 @@ print('-' * 20 + 'Linear Eval' + '-' * 20)
 joint_path = '/mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/PKU2/xsub/joint_MutalDDM_with4parallel_ablmask_1500/linear_tmp/'
 bone_path = '/mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/PKU2/xsub/bone_MutalDDM_with4parallel_ablmask_1500/linear_tmp/'
 motion_path = '/mnt/netdisk/zhangjh/Code/AimCLR_loss/work_dir/PKU2/xsub/motion_MutalDDM_with4parallel_ablmask_1500/linear_tmp/'
-
+ 
 label = open('/mnt/netdisk/linlilang/PKUMMD2/xsub/val_label.pkl', 'rb')
 label = np.array(pickle.load(label))
 r1 = open(joint_path + 'test_result.pkl', 'rb')
