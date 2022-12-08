@@ -18,9 +18,10 @@ r2 = list(pickle.load(r2).items())
 r3 = open(motion_path + 'test_result.pkl', 'rb')
 r3 = list(pickle.load(r3).items())
 
+
 alpha1 = [0.5,0.5,0.5]# average fusion
 alpha2 = [0.6, 0.6, 0.4] # aimclr weighted fusion
-if 1:
+if 1: 
     best = 0.0
     best_weight = []
     for alpha in [alpha1,alpha2]:
