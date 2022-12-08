@@ -36,7 +36,7 @@ if __name__ == '__main__':
     processors['pretrain_hiclr'] = import_class('processor.pretrain_hiclr.HiCLR_Processor')
     processors['linear_evaluation'] = import_class('processor.linear_evaluation.LE_Processor')
     processors['finetune_evaluation'] = import_class('processor.finetune_evaluation.FT_Processor')
-    #processors['vis_evaluation'] = import_class('processor.visualize_aimclr.Visualize_Processor')
+    
     # add sub-parser
     subparsers = parser.add_subparsers(dest='processor')
     for k, p in processors.items():
