@@ -55,7 +55,7 @@ If you find this repository useful, please consider citing our paper:
 ## Acknowledgement
 We sincerely thank the authors for releasing the code of their valuable works. Our code is built based on the following repos.
 - The code of our framework is heavily based on [AimCLR](https://github.com/Levigty/AimCLR).
-- The code of encoder is based on [ST-GCN](https://github.com/yysijie/st-gcn/blob/master/OLD_README.md).
+- The code of encoder is based on [ST-GCN](https://github.com/yysijie/st-gcn/blob/master/OLD_README.md) and [DSTA-Net](https://github.com/lshiwjx/DSTA-Net).
 
 ## Licence
 
