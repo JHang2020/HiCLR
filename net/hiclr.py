@@ -63,12 +63,6 @@ class HiCLR(nn.Module):
                                                   nn.ReLU(),
                                                   self.encoder_k.fc)
             
-            #self.last_fc1 = nn.Sequential(nn.ReLU(),
-            #                              nn.Linear(feature_dim, feature_dim))
-            #self.last_fc2 = nn.Sequential(nn.ReLU(),
-            #                              nn.Linear(feature_dim, feature_dim))
-            #self.last_fc3 = nn.Sequential(nn.ReLU(),
-            #                              nn.Linear(feature_dim, feature_dim))
             for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
                 param_k.data.copy_(param_q.data)  # initialize
                 param_k.requires_grad = False  # not update by gradient

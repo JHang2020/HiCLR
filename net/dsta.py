@@ -89,7 +89,7 @@ class STAttentionBlock(nn.Module):
             if att_s:
                 self.in_nets = nn.Conv2d(in_channels, 2 * num_subset * inter_channels, 1, bias=True)
                 self.alphas = nn.Parameter(torch.ones(1, num_subset, 1, 1), requires_grad=True)
-            if glo_reg_s:#全局attention正则化
+            if glo_reg_s:
                 self.attention0s = nn.Parameter(torch.ones(1, num_subset, num_node, num_node) / num_node,
                                                 requires_grad=True)
 
@@ -191,23 +191,23 @@ class STAttentionBlock(nn.Module):
         if self.use_spatial_att:
             attention = self.atts
             if self.use_pes:
-                y = self.pes(x)#空间位置编码
+                y = self.pes(x)
             else:
                 y = x
             if self.att_s:
                 q, k = torch.chunk(self.in_nets(y).view(N, 2 * self.num_subset, self.inter_channels, T, V), 2,
                                    dim=1)  # nctv -> （n num_subset c'tv）*2 
                 attention = attention + self.tan(
-                    torch.einsum('nsctu,nsctv->nsuv', [q, k]) / (self.inter_channels * T)) * self.alphas #时序上atten求平均
+                    torch.einsum('nsctu,nsctv->nsuv', [q, k]) / (self.inter_channels * T)) * self.alphas
             #N,Set,V,V
             if self.glo_reg_s:
-                attention = attention + self.attention0s.repeat(N, 1, 1, 1)#加上全局atten
+                attention = attention + self.attention0s.repeat(N, 1, 1, 1)
             #attention = self.drop(attention)
             if drop_graph:
                 attention = self.drop_graph(attention)
                 attention = self.randadd(attention)
             y = torch.einsum('nctu,nsuv->nsctv', [x, attention]).contiguous() \
-                .view(N, self.num_subset * self.in_channels, T, V) #做atten加权
+                .view(N, self.num_subset * self.in_channels, T, V)
             y = self.out_nets(y)  # nctv
 
             y = self.relu(self.downs1(x) + y)

@@ -4,7 +4,6 @@ import torch.nn.functional as F
 
 from net.utils.tgcn import ConvTemporalGraphical
 from net.utils.graph import Graph
-from net.att_drop import Simam_Drop
 import random
 
 class Model(nn.Module):
@@ -38,7 +37,6 @@ class Model(nn.Module):
             st_gcn(hidden_channels * 4, hidden_dim, kernel_size, 1, **kwargs),
         ))
         self.fc = nn.Linear(hidden_dim, num_class)
-        self.dropout = Simam_Drop(num_point=25, keep_prob=0.7)
 
         self.dropout_graph = dropout_graph
         self.add_graph = add_graph

@@ -119,77 +119,6 @@ class Feeder_triple(torch.utils.data.Dataset):
 
         return data_numpy
 
-class Feeder_triple_abl(torch.utils.data.Dataset):
-    """ Feeder for triple inputs """
-
-    def __init__(self, data_path, label_path, shear_amplitude=0.5, temperal_padding_ratio=6, mmap=True,
-                 aug_method='12345'):
-        self.data_path = data_path
-        self.label_path = label_path
-        self.aug_method = aug_method
-
-        self.shear_amplitude = shear_amplitude
-        self.temperal_padding_ratio = temperal_padding_ratio
-
-        self.load_data(mmap)
-
-    def load_data(self, mmap):
-        # load label
-        with open(self.label_path, 'rb') as f:
-            self.sample_name, self.label = pickle.load(f)
-
-        # load data
-        if mmap:
-            self.data = np.load(self.data_path, mmap_mode='r')
-        else:
-            self.data = np.load(self.data_path)
-
-    def __len__(self):
-        return len(self.label)
-
-    def __getitem__(self, index):
-        # get data
-        data_numpy = np.array(self.data[index])
-        label = self.label[index]
-
-        # processing
-        data1 = self._normal_aug(self._basic_aug(data_numpy))
-        data2 = self._normal_aug(self._basic_aug(data_numpy))
-        data3 = self._normal_aug(self._basic_aug(data_numpy))
-        data4 = self._normal_aug(self._basic_aug(data_numpy))
-        data5 = self._normal_aug(self._basic_aug(data_numpy))
-        #data5 = data4
-        return [data1, data2, data3, data4, data5], label
-
-    def _basic_aug(self, data_numpy):
-        if self.temperal_padding_ratio > 0:
-            data_numpy = tools.temperal_crop(data_numpy, self.temperal_padding_ratio)
-
-        if self.shear_amplitude > 0:
-            data_numpy = tools.shear(data_numpy, self.shear_amplitude)
-        return data_numpy
-    # you can choose different combinations
-    def _normal_aug(self, data_numpy):
-        #if self.temperal_padding_ratio > 0:
-        #    data_numpy = tools.temperal_crop(data_numpy, self.temperal_padding_ratio)
-        #if self.shear_amplitude > 0:
-        #    data_numpy = tools.shear(data_numpy, self.shear_amplitude)
-        if '1' in self.aug_method:
-            data_numpy = tools.random_spatial_flip(data_numpy)
-        if '2' in self.aug_method:
-            data_numpy = tools.random_rotate(data_numpy)
-        if '3' in self.aug_method:
-            data_numpy = tools.gaus_noise(data_numpy)
-        if '4' in self.aug_method:
-            data_numpy = tools.gaus_filter(data_numpy)
-        if '5' in self.aug_method:
-            data_numpy = tools.axis_mask(data_numpy)
-        if '6' in self.aug_method:
-            data_numpy = tools.random_time_flip(data_numpy)
-
-        return data_numpy
-
-
 class Feeder_semi(torch.utils.data.Dataset):
     """ Feeder for single inputs """
 
@@ -402,10 +331,10 @@ class Feeder_semieval(torch.utils.data.Dataset):
         else:
             return data_numpy, torch.ones((self.T,))
     def top_k(self, score, top_k):
-        rank = score.argsort()#将x中的元素从小到大排列，提取其对应的index
-        hit_top_k = [l in rank[i, -top_k:] for i, l in enumerate(self.label)]#是01数组，1表示truth_label
-                                                                             #在前top_k大的预测得分中
-        return sum(hit_top_k) * 1.0 / len(hit_top_k)#返回accurracy
+        rank = score.argsort()#
+        hit_top_k = [l in rank[i, -top_k:] for i, l in enumerate(self.label)]
+                                                                             
+        return sum(hit_top_k) * 1.0 / len(hit_top_k)
 
 class Feeder_finetune(torch.utils.data.Dataset):
     """ Feeder for skeleton-based action recognition
@@ -523,7 +452,7 @@ class Feeder_finetune(torch.utils.data.Dataset):
         else:
             return data_numpy, torch.ones((self.T,))
     def top_k(self, score, top_k):
-        rank = score.argsort()#将x中的元素从小到大排列，提取其对应的index
-        hit_top_k = [l in rank[i, -top_k:] for i, l in enumerate(self.label)]#是01数组，1表示truth_label
-                                                                             #在前top_k大的预测得分中
-        return sum(hit_top_k) * 1.0 / len(hit_top_k)#返回accurracy
+        rank = score.argsort()#
+        hit_top_k = [l in rank[i, -top_k:] for i, l in enumerate(self.label)]
+                                                                             
+        return sum(hit_top_k) * 1.0 / len(hit_top_k)
