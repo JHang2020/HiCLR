@@ -10,7 +10,7 @@ python main.py linear_evaluation --config config/release/ntu60/linear_eval/linea
 python main.py linear_evaluation --config config/release/ntu60/linear_eval/linear_eval_hiclr_xsub_motion.yaml
 python main.py linear_evaluation --config config/release/ntu60/linear_eval/linear_eval_hiclr_xsub_bone.yaml
 
-#semi or finetune
+#finetune
 python main.py finetune_evaluation --config config/release/gcn_ntu60/finetune/xsub_joint.yaml
 # Ensemble
 python ensemble_ntu_cs.py
