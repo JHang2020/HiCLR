@@ -41,6 +41,16 @@ You can find the pre-trained model weights [here](https://drive.google.com/drive
 |  HiCLR-bone  |      75.59      |
 |   3s-HiCLR   |    **80.94**    |
 
+## Citation
+If you find this repository useful, please consider citing our paper:
+```
+@article{zhang2022s,
+    title={Hierarchical Consistent Contrastive Learning for Skeleton-Based Action Recognition with Growing Augmentations},
+    author={Zhang, Jiahang and Lin, Lilang and Liu, Jiaying},
+    journal={arXiv preprint arXiv:2211.13466},
+    year={2022},
+}
+```
 
 ## Acknowledgement
 We sincerely thank the authors for releasing the code of their valuable works. Our code is built based on the following repos.
