@@ -1,9 +1,8 @@
 # HiCLR
-<<<<<<< HEAD
-
 This is an official PyTorch implementation of [**"Hierarchical Consistent Contrastive Learning for Skeleton-Based Action Recognition with Growing Augmentations"**](https://arxiv.org/abs/2211.13466) in *AAAI 2023*. 
 
 ![](./fig/pipe.jpg)
+
 
 ## Requirements
   ![Python >=3.6](https://img.shields.io/badge/Python->=3.6-yellow.svg)    ![PyTorch >=1.6](https://img.shields.io/badge/PyTorch->=1.4-blue.svg)
@@ -61,11 +60,3 @@ We sincerely thank the authors for releasing the code of their valuable works. O
 ## Licence
 
 This project is licensed under the terms of the MIT license.
-=======
-Hierarchical Consistent Contrastive Learning for Skeleton-Based Action Recognition with Growing Augmentations, AAAI 2023.
-
-To Do:
-- [ ] Release code
-
-- [ ] Release checkpoints
->>>>>>> 11f08d16944d9a01c1c1cabd3f62d5ae98ba57b4
